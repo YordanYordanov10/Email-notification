@@ -8,6 +8,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class EmailNotificationService {
@@ -35,6 +36,7 @@ public class EmailNotificationService {
                 .userId(emailRequest.getUserId())
                 .price(emailRequest.getPrice())
                 .createdAt(LocalDateTime.now())
+                .reminderSent(false)
                 .build();
 
         emailNotificationRepository.save(emailNotification);
@@ -66,5 +68,15 @@ public class EmailNotificationService {
         mailSender.send(barberMessage);
 
         return emailNotification;
+    }
+
+    public List<EmailNotification> findByLocalDateTime() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime next24Hours = now.plusDays(1);
+        return emailNotificationRepository.findByAppointmentDateTimeBetweenAndReminderSentFalse(now, next24Hours);
+    }
+
+    public void update(EmailNotification emailNotification) {
+        emailNotificationRepository.save(emailNotification);
     }
 }

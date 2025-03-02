@@ -46,4 +46,7 @@ public class EmailNotification {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    private boolean reminderSent;
+
 }
