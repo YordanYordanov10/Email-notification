@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.Builder;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -35,7 +36,10 @@ public class EmailNotification {
     private String userEmail;
 
     @Column(nullable = false)
-    private LocalDateTime appointmentDateTime;
+    private LocalDate appointmentDate;
+
+    @Column(nullable = false)
+    private String timeSlot;
 
     @Column(nullable = false)
     private String serviceType;

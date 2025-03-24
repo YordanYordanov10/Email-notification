@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -29,7 +30,10 @@ public class EmailRequest {
     private String userEmail;
 
     @NotNull
-    private LocalDateTime appointmentDateTime;
+    private LocalDate appointmentDate;
+
+    @NotNull
+    private String timeSlot;
 
     @NotBlank
     private String serviceType;

@@ -3,12 +3,14 @@ package bg.softuni.email.Service;
 import bg.softuni.email.Model.EmailNotification;
 import bg.softuni.email.Repository.EmailNotificationRepository;
 import bg.softuni.email.Web.Dto.EmailRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class EmailNotificationService {
@@ -28,7 +30,8 @@ public class EmailNotificationService {
 
         EmailNotification emailNotification = EmailNotification.builder()
                 .barberEmail(emailRequest.getBarberEmail())
-                .appointmentDateTime(emailRequest.getAppointmentDateTime())
+                .appointmentDate(emailRequest.getAppointmentDate())
+                .timeSlot(emailRequest.getTimeSlot())
                 .barberId(emailRequest.getBarberId())
                 .barberName(emailRequest.getBarberName())
                 .serviceType(emailRequest.getServiceType())
@@ -42,26 +45,26 @@ public class EmailNotificationService {
         emailNotificationRepository.save(emailNotification);
 
 
-        // 📩 Изпращане на имейл до клиента
+
         SimpleMailMessage userMessage = new SimpleMailMessage();
         userMessage.setTo(emailRequest.getUserEmail());
         userMessage.setSubject("Your Appointment Confirmation");
         userMessage.setText("Hello,\n\nYour appointment for " + emailRequest.getServiceType() +
                 " with " + emailRequest.getBarberName() +
-                " is scheduled for " + emailRequest.getAppointmentDateTime() +
+                " is scheduled for " + emailRequest.getAppointmentDate() + emailRequest.getTimeSlot() +
                 ".\nPrice: " + emailRequest.getPrice() +
                 "\n\nThank you for choosing us!");
 
         mailSender.send(userMessage);
 
-        // 📩 Изпращане на имейл до барбъра
+
         SimpleMailMessage barberMessage = new SimpleMailMessage();
         barberMessage.setTo(emailRequest.getBarberEmail());
         barberMessage.setSubject("New Appointment Scheduled");
         barberMessage.setText("Hello " + emailRequest.getBarberName() + ",\n\nYou have a new appointment scheduled.\n" +
                 "Client: " + emailRequest.getUserEmail() + "\n" +
                 "Service: " + emailRequest.getServiceType() + "\n" +
-                "Date & Time: " + emailRequest.getAppointmentDateTime() + "\n" +
+                "Date & Time: " + emailRequest.getAppointmentDate() + emailRequest.getTimeSlot() + "\n" +
                 "Price: " + emailRequest.getPrice() + "\n\n" +
                 "Please be prepared!");
 
@@ -73,10 +76,19 @@ public class EmailNotificationService {
     public List<EmailNotification> findByLocalDateTime() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime next24Hours = now.plusDays(1);
-        return emailNotificationRepository.findByAppointmentDateTimeBetweenAndReminderSentFalse(now, next24Hours);
+
+        return emailNotificationRepository.findByAppointmentDateBetweenAndReminderSentFalse(
+                now.toLocalDate(), next24Hours.toLocalDate()
+        );
     }
+
 
     public void update(EmailNotification emailNotification) {
         emailNotificationRepository.save(emailNotification);
+    }
+
+    @Transactional
+    public void deleteEmailNotification(UUID userId) {
+        emailNotificationRepository.deleteEmailNotificationByUserId(userId);
     }
 }

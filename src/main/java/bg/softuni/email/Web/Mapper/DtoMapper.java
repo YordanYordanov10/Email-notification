@@ -13,7 +13,8 @@ public class DtoMapper {
 
       return EmailResponse.builder()
               .serviceType(notification.getServiceType())
-              .appointmentTime(notification.getAppointmentDateTime())
+              .appointment(notification.getAppointmentDate())
+              .timeSlot(notification.getTimeSlot())
               .barberId(notification.getBarberId())
               .userId(notification.getUserId())
               .build();

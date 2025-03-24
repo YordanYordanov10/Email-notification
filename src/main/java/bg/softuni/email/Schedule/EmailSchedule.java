@@ -23,17 +23,15 @@ public class EmailSchedule {
         this.mailSender = mailSender;
     }
 
-    @Scheduled(fixedRate = 10000)
-//    @Scheduled(cron = "0 0 8 * * ?")
-    public void sendEmail() {
 
+    @Scheduled(cron = "0 0 8 * * ?")
+    public void sendEmail() {
         List<EmailNotification> emailNotificationsList = emailNotificationService.findByLocalDateTime();
 
         LocalDateTime now = LocalDateTime.now();
 
         for (EmailNotification emailNotification : emailNotificationsList) {
-
-            LocalDateTime appointmentDateTime = emailNotification.getAppointmentDateTime();
+            LocalDateTime appointmentDateTime = emailNotification.getAppointmentDate().atStartOfDay();
 
             if (appointmentDateTime.minusDays(2).isBefore(now) &&
                     appointmentDateTime.isAfter(now) &&
@@ -43,19 +41,20 @@ public class EmailSchedule {
                 userMessage.setTo(emailNotification.getUserEmail());
                 userMessage.setSubject("Reminder for Appointment");
                 userMessage.setText(String.format(
-                        "Hello,\n\nYour appointment for %s with %s is scheduled for %s.\nPrice: %.2f\n\nThank you for choosing us!",
+                        "Hello,\n\nYour appointment for %s with %s is scheduled for %s at %s.\nPrice: %.2f BGN\n\nThank you for choosing us!",
                         emailNotification.getServiceType(),
                         emailNotification.getBarberName(),
-                        emailNotification.getAppointmentDateTime(),
+                        emailNotification.getAppointmentDate(),
+                        emailNotification.getTimeSlot(),
                         emailNotification.getPrice()
                 ));
 
                 mailSender.send(userMessage);
 
-
                 emailNotification.setReminderSent(true);
                 emailNotificationService.update(emailNotification);
             }
-        };
+        }
     }
+
 }
