@@ -15,4 +15,9 @@ public interface EmailNotificationRepository extends JpaRepository<EmailNotifica
     List<EmailNotification> findByAppointmentDateBetweenAndReminderSentFalse(LocalDate localDate, LocalDate localDate1);
 
     void deleteEmailNotificationByUserId(UUID userId);
+
+    EmailNotification findByAppointmentDateAndTimeSlotAndUserId(LocalDate appointmentDate, String timeSlot, UUID userId);
+
+    EmailNotification findByAppointmentDateAndTimeSlotAndBarberId(LocalDate appointmentDate, String timeSlot, UUID barberId);
+
 }

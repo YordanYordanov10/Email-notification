@@ -8,6 +8,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -26,8 +27,6 @@ public class EmailNotificationService {
 
     public EmailNotification sendNotification(EmailRequest emailRequest) {
 
-
-
         EmailNotification emailNotification = EmailNotification.builder()
                 .barberEmail(emailRequest.getBarberEmail())
                 .appointmentDate(emailRequest.getAppointmentDate())
@@ -44,8 +43,6 @@ public class EmailNotificationService {
 
         emailNotificationRepository.save(emailNotification);
 
-
-
         SimpleMailMessage userMessage = new SimpleMailMessage();
         userMessage.setTo(emailRequest.getUserEmail());
         userMessage.setSubject("Your Appointment Confirmation");
@@ -56,7 +53,6 @@ public class EmailNotificationService {
                 "\n\nThank you for choosing us!");
 
         mailSender.send(userMessage);
-
 
         SimpleMailMessage barberMessage = new SimpleMailMessage();
         barberMessage.setTo(emailRequest.getBarberEmail());
@@ -87,8 +83,28 @@ public class EmailNotificationService {
         emailNotificationRepository.save(emailNotification);
     }
 
-    @Transactional
-    public void deleteEmailNotification(UUID userId) {
-        emailNotificationRepository.deleteEmailNotificationByUserId(userId);
+
+    public void deleteEmailNotification(UUID userId, LocalDate appointmentDate, String timeSlot) {
+        EmailNotification notification = emailNotificationRepository
+                .findByAppointmentDateAndTimeSlotAndUserId(appointmentDate, timeSlot, userId);
+
+        if (notification != null) {
+            emailNotificationRepository.delete(notification);
+        }
+
+    }
+
+    public void deleteEmailNotificationByBarber(UUID barberId, LocalDate appointmentDate, String timeSlot) {
+        EmailNotification notification = emailNotificationRepository
+                .findByAppointmentDateAndTimeSlotAndBarberId(appointmentDate, timeSlot, barberId);
+
+        if (notification != null) {
+            emailNotificationRepository.delete(notification);
+        }
+
+    }
+
+    public EmailNotification findNotificationEmailSentDate(LocalDate appointmentDate, String timeSlot,UUID barberId) {
+        return emailNotificationRepository.findByAppointmentDateAndTimeSlotAndBarberId(appointmentDate,timeSlot,barberId);
     }
 }
